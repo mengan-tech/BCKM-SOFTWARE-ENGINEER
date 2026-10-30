@@ -1,0 +1,13 @@
+spring:
+    datasource:
+        url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        username: shop
+        password:
+    sql:
+        init:
+            mode: always
+
+shop:
+    currency: USD
+    tax-rate: 0.10
+    low-stock-threshold: 5

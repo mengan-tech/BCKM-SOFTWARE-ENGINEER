@@ -1,0 +1,13 @@
+spring:
+  h2:
+    console:
+      enabled: false
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/shop}
+    username: ${DB_USER:shop}
+    password: ${DB_PASSWORD:}
+
+logging:
+  level:
+    root: INFO
+    edu.itc.shop: INFO
