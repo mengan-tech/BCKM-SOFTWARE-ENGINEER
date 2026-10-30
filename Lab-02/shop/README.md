@@ -46,3 +46,13 @@ The app runs on **http://localhost:8081**. Stop it with `Ctrl+C`.
 
 The database is stored in `data/shop.mv.db` (ignored by Git, so each person has their own).
 
+### Screenshots
+
+**JSP product list** 
+
+![JSP product list](docs/screenshots/products-list.png)
+
+**Health check DOWN** (`/actuator/health`).
+
+![Actuator health DOWN](docs/screenshots/health-down.png)
+
