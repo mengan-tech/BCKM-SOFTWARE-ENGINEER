@@ -1,6 +1,10 @@
 package edu.itc.shop.domain;
 
 import jakarta.persistence.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "product")
@@ -27,6 +31,13 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
+    @ManyToMany
+    @JoinTable(
+            name = "product_tag",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
+
     protected Product() { }
 
     public Product(String sku, String name, Money price, Category category) {
@@ -43,8 +54,33 @@ public class Product {
     public Money getPrice() { return price; }
     public Category getCategory() { return category; }
     public int getStock() { return stock; }
+    public Set<Tag> getTags() { return Collections.unmodifiableSet(tags); }
 
     public void setName(String name) { this.name = name; }
     public void setPrice(Money price) { this.price = price; }
     public void setStock(int stock) { this.stock = stock; }
+
+    public void tag(Tag tag) {
+        Objects.requireNonNull(tag, "tag");
+        if (tags.add(tag)) {
+            tag.addProduct(this);
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || (other != null && getClass() == other.getClass()
+                && id != null && id.equals(((Product) other).id));
+    }
+
+    @Override
+    public int hashCode() {
+        return Product.class.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Product[id=%s, sku=%s, name=%s, price=%s, category=%s, stock=%d]"
+                .formatted(id, sku, name, price, category, stock);
+    }
 }
