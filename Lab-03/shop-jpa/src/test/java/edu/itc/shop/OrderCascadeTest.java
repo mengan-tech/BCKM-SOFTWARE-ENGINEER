@@ -16,12 +16,14 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ExtendWith(OutputCaptureExtension.class)
+@TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:shop_cascade;DB_CLOSE_DELAY=-1")
 class OrderCascadeTest {
 
     @Autowired
@@ -76,6 +78,15 @@ class OrderCascadeTest {
     }
 
     private int occurrences(String text, String sql) {
-        return text.split("(?i)" + sql.replace(" ", "\\s+") + "\\b", -1).length - 1;
+        // Each SQL is logged twice: once as "org.hibernate.SQL : ..." and once as "Hibernate: ..."
+        // Count only the "Hibernate:" prefixed lines to avoid double counting
+        int count = 0;
+        String pattern = "Hibernate: " + sql;
+        int idx = 0;
+        while ((idx = text.toLowerCase().indexOf(pattern.toLowerCase(), idx)) != -1) {
+            count++;
+            idx += pattern.length();
+        }
+        return count;
     }
 }
