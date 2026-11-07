@@ -37,4 +37,20 @@ public class Customer {
     }
 
     public Long getId() { return id; }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || (other != null && getClass() == other.getClass()
+                && id != null && id.equals(((Customer) other).id));
+    }
+
+    @Override
+    public int hashCode() {
+        return Customer.class.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Customer[id=%s, name=%s, email=%s]".formatted(id, name, email);
+    }
 }

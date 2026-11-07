@@ -2,38 +2,79 @@ package edu.itc.shop.domain;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-@Entity 
+@Entity
 @Table(name = "orders")
 public class Order {
 
-    @Id 
-    @GeneratedValue (strategy = GenerationType.SEQUENCE, generator = "customer_seq")
-    @SequenceGenerator (name = "customer_seq", sequenceName = "customer_seq", allocationSize = 50)
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_seq")
+    @SequenceGenerator(name = "orders_seq", sequenceName = "orders_seq", allocationSize = 50)
     private Long id;
 
-    @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn (name = "customer_id", nullable = false )
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.NEW;
 
-    @Column(nullable = false)
-    private Instant placedAt;
+    @Column(name = "placed_at", nullable = false)
+    private Instant placedAt = Instant.now();
 
-    // Automatically managed by Hibernate for concurrent update safety
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderLine> lines = new ArrayList<>();
+
     @Version
-    @Column(nullable = false)
     private long version;
 
-    protected Order() {}
+    protected Order() { }
+
+    public Order(Customer customer) {
+        this.customer = customer;
+    }
 
     public Order(Customer customer, OrderStatus status, Instant placedAt) {
         this.customer = customer;
         this.status = status;
         this.placedAt = placedAt;
+    }
+
+    public OrderLine addLine(Product product, int quantity) {
+        OrderLine line = new OrderLine(this, product, quantity, product.getPrice());
+        lines.add(line);
+        return line;
+    }
+
+    public void removeLine(OrderLine line) {
+        int index = lines.indexOf(line);
+        if (index >= 0) {
+            lines.remove(index).setOrder(null);
+        }
+    }
+
+    public List<OrderLine> getLines() {
+        return Collections.unmodifiableList(lines);
+    }
+
+    public Money total() {
+        Money total = null;
+        for (OrderLine line : lines) {
+            Money lineTotal = line.getUnitPrice().times(line.getQuantity());
+            if (total == null) {
+                total = lineTotal;
+            } else {
+                if (!total.currency().equals(lineTotal.currency())) {
+                    throw new IllegalStateException("Cannot total order lines with different currencies");
+                }
+                total = new Money(total.amount().add(lineTotal.amount()), total.currency());
+            }
+        }
+        return total == null ? Money.eur("0") : total;
     }
 
     public Long getId() { return id; }
@@ -42,4 +83,19 @@ public class Order {
     public Instant getPlacedAt() { return placedAt; }
     public long getVersion() { return version; }
 
+    @Override
+    public boolean equals(Object other) {
+        return this == other || (other != null && getClass() == other.getClass()
+                && id != null && id.equals(((Order) other).id));
+    }
+
+    @Override
+    public int hashCode() {
+        return Order.class.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Order[id=%s, status=%s, placedAt=%s, version=%d]".formatted(id, status, placedAt, version);
+    }
 }
