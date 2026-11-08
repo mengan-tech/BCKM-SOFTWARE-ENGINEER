@@ -1,12 +1,13 @@
 package edu.itc.shop.repository;
 
-import java.time.Instant;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import edu.itc.shop.domain.Order;
 import edu.itc.shop.domain.OrderStatus;
 import edu.itc.shop.web.dto.OrderSummary;
@@ -19,12 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Order findFirstByCustomerIdOrderByPlacedAtDesc(Long customerId);
 
-    @Query(value = """
-        select distinct o.id as id, o.status as status, o.placedAt as placedAt, c as customer
-        from Order o join o.customer c
-        where o.status = :status
-        """, countQuery = "select count(o) from Order o where o.status = :status")
-    Page<OrderSummary> findByStatus(@Param("status") OrderStatus status, Pageable pageable);
+    
+    Page<OrderSummary> findByStatus(OrderStatus status, Pageable pageable);
 
     @Query("""
         select distinct o from Order o
