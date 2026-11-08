@@ -1,6 +1,7 @@
 package edu.itc.shop.domain;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -54,6 +55,7 @@ public class Product {
     public Money getPrice() { return price; }
     public Category getCategory() { return category; }
     public int getStock() { return stock; }
+    @JsonIgnore
     public Set<Tag> getTags() { return Collections.unmodifiableSet(tags); }
 
     public void setName(String name) { this.name = name; }

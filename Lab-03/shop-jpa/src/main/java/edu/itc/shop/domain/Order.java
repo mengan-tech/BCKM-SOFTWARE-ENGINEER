@@ -1,5 +1,6 @@
 package edu.itc.shop.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ public class Order {
     }
 
     public Long getId() { return id; }
+    @JsonIgnore
     public Customer getCustomer() { return customer; }
     public OrderStatus getStatus() { return status; }
     public Instant getPlacedAt() { return placedAt; }

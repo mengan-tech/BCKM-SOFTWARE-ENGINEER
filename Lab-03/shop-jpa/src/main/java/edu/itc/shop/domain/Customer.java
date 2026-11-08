@@ -1,5 +1,6 @@
 package edu.itc.shop.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity 

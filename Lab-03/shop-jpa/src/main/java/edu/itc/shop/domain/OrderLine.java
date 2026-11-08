@@ -1,5 +1,6 @@
 package edu.itc.shop.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -36,6 +37,7 @@ public class OrderLine {
     }
 
     public Long getId() { return id; }
+    @JsonIgnore
     public Order getOrder() { return order; }
     public Product getProduct() { return product; }
     public int getQuantity() { return quantity; }
