@@ -1,7 +1,15 @@
 package edu.itc.shop.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
 @Entity 
 @Table(name = "customer")
@@ -15,7 +23,7 @@ public class Customer {
     @Column(nullable = false)
     private String name;
 
-     @Column(nullable = false)
+    @Column(nullable = false)
     private String email;
 
     @Embedded
@@ -38,6 +46,10 @@ public class Customer {
     }
 
     public Long getId() { return id; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public Address getBilling() { return billing; }
+    public Address getShipping() { return shipping; }
 
     @Override
     public boolean equals(Object other) {

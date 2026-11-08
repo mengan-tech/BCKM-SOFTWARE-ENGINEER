@@ -1,16 +1,16 @@
 package edu.itc.shop.service;
 
-import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
 import edu.itc.shop.domain.Address;
 import edu.itc.shop.domain.Category;
 import edu.itc.shop.domain.Customer;
@@ -22,10 +22,11 @@ import edu.itc.shop.domain.Tag;
 import edu.itc.shop.repository.CustomerRepository;
 import edu.itc.shop.repository.OrderRepository;
 import edu.itc.shop.repository.ProductRepository;
+import edu.itc.shop.repository.TagRepository;
 
-@Configuration
-@Profile("dev")
-class DataSeeder {
+@Component
+@Profile("dev")   // only runs with --spring.profiles.active=dev
+public class DataSeeder implements ApplicationRunner {
 
     private static final String[] NAMES = {
             "Mechanical Keyboard", "Wireless Mouse", "USB-C Hub", "Monitor Stand",
@@ -45,83 +46,73 @@ class DataSeeder {
             "featured", "sale", "new", "popular", "clearance"
     };
 
-    @Bean
-    ApplicationRunner seedRunner(Seeder seeder) {
-        return args -> seeder.seed();
+    private final CustomerRepository customers;
+    private final ProductRepository products;
+    private final TagRepository tags;
+    private final OrderRepository orders;
+
+    public DataSeeder(CustomerRepository customers, ProductRepository products,
+                      TagRepository tags, OrderRepository orders) {
+        this.customers = customers;
+        this.products = products;
+        this.tags = tags;
+        this.orders = orders;
     }
 
-    @Component
-    @Profile("dev")
-    static class Seeder {
-        private final CustomerRepository customers;
-        private final ProductRepository products;
-        private final OrderRepository orders;
-        private final EntityManager em;
-
-        Seeder(CustomerRepository customers, ProductRepository products,
-               OrderRepository orders, EntityManager em) {
-            this.customers = customers;
-            this.products = products;
-            this.orders = orders;
-            this.em = em;
+    @Override
+    @Transactional   
+    public void run(ApplicationArguments args) {
+        if (customers.count() > 0) {
+            return;   
         }
 
-        @Transactional
-        void seed() {
-            // 3 customers
-            Customer c1 = customers.save(new Customer(
-                    "Ada Lovelace", "ada@example.com",
-                    new Address("1 Math St", "London", "EC1A"),
-                    new Address("1 Math St", "London", "EC1A")));
-            Customer c2 = customers.save(new Customer(
-                    "Grace Hopper", "grace@example.com",
-                    new Address("2 Code Ave", "Boston", "02101"),
-                    new Address("2 Code Ave", "Boston", "02101")));
-            Customer c3 = customers.save(new Customer(
-                    "Alan Turing", "alan@example.com",
-                    new Address("3 Logic Rd", "Cambridge", "CB1"),
-                    new Address("3 Logic Rd", "Cambridge", "CB1")));
-            Customer[] custs = {c1, c2, c3};
+        // 3 customers
+        List<Customer> custs = customers.saveAll(List.of(
+                new Customer("Ada Lovelace", "ada@example.com",
+                        new Address("1 Math St", "London", "EC1A"),
+                        new Address("1 Math St", "London", "EC1A")),
+                new Customer("Grace Hopper", "grace@example.com",
+                        new Address("2 Code Ave", "Boston", "02101"),
+                        new Address("2 Code Ave", "Boston", "02101")),
+                new Customer("Alan Turing", "alan@example.com",
+                        new Address("3 Logic Rd", "Cambridge", "CB1"),
+                        new Address("3 Logic Rd", "Cambridge", "CB1"))));
 
-            // Tags - persist them first
-            Tag[] tags = new Tag[TAG_NAMES.length];
-            for (int i = 0; i < TAG_NAMES.length; i++) {
-                tags[i] = new Tag(TAG_NAMES[i]);
-                em.persist(tags[i]);
-            }
-            em.flush();
-
-            // 12 products with tags
-            Random rnd = new Random(42);
-            Product[] prods = new Product[12];
-            for (int i = 0; i < 12; i++) {
-                Money price = Money.eur(String.valueOf(rnd.nextInt(500) + 10));
-                Product p = new Product(SKUS[i], NAMES[i], price, CATEGORIES[i]);
-                p.setStock(rnd.nextInt(30));
-                // assign 1-3 random tags
-                int tagCount = rnd.nextInt(3) + 1;
-                for (int t = 0; t < tagCount; t++) {
-                    p.tag(tags[rnd.nextInt(tags.length)]);
-                }
-                prods[i] = products.save(p);
-            }
-
-            // 30 orders with 2-4 lines each, mixed statuses
-            OrderStatus[] statuses = OrderStatus.values();
-            List<Order> allOrders = new ArrayList<>();
-            for (int i = 0; i < 30; i++) {
-                Customer cust = custs[rnd.nextInt(custs.length)];
-                OrderStatus status = statuses[rnd.nextInt(statuses.length)];
-                Instant placedAt = Instant.now().minusSeconds(rnd.nextInt(86400 * 30));
-                Order order = new Order(cust, status, placedAt);
-                int lineCount = rnd.nextInt(3) + 2; // 2-4 lines
-                for (int l = 0; l < lineCount; l++) {
-                    Product prod = prods[rnd.nextInt(prods.length)];
-                    order.addLine(prod, rnd.nextInt(3) + 1);
-                }
-                allOrders.add(order);
-            }
-            orders.saveAll(allOrders);
+        
+        List<Tag> tagList = new ArrayList<>();
+        for (String name : TAG_NAMES) {
+            tagList.add(tags.save(new Tag(name)));
         }
+
+        // 12 products with 1-3 tags
+        Random rnd = new Random(42);
+        List<Product> prods = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            Money price = Money.eur(String.valueOf(rnd.nextInt(500) + 10));
+            Product p = new Product(SKUS[i], NAMES[i], price, CATEGORIES[i]);
+            p.setStock(rnd.nextInt(30));
+            int tagCount = rnd.nextInt(3) + 1;
+            for (int t = 0; t < tagCount; t++) {
+                p.tag(tagList.get(rnd.nextInt(tagList.size())));
+            }
+            prods.add(products.save(p));
+        }
+
+        // 30 orders with 2-4 lines each
+        OrderStatus[] statuses = OrderStatus.values();
+        List<Order> allOrders = new ArrayList<>();
+        for (int i = 0; i < 30; i++) {
+            Customer cust = custs.get(rnd.nextInt(custs.size()));
+            OrderStatus status = statuses[rnd.nextInt(statuses.length)];
+            Instant placedAt = Instant.now().minusSeconds(rnd.nextInt(86400 * 30));
+            Order order = new Order(cust, status, placedAt);
+            int lineCount = rnd.nextInt(3) + 2; 
+            for (int l = 0; l < lineCount; l++) {
+                Product prod = prods.get(rnd.nextInt(prods.size()));
+                order.addLine(prod, rnd.nextInt(3) + 1);
+            }
+            allOrders.add(order);
+        }
+        orders.saveAll(allOrders); 
     }
 }
