@@ -88,3 +88,56 @@ org.hibernate.SQL : insert into tag (name,id) values (?,?)
 org.hibernate.SQL : delete from tag where id=?
 org.hibernate.SQL : insert into tag (name,id) values (?,?)
 ```
+
+
+---
+
+## Task 5
+
+### Run the Task 5 tests (PowerShell, from `Lab-03\shop-jpa`)
+
+```powershell
+.\mvnw.cmd -q test "-Dtest=NPlusOneTest,BatchInsertTest"
+```
+
+The verified statement counts from `NPlusOneTest` are:
+
+| variant | statements |
+|---|---:|
+| naive lazy loop | 51 |
+| join fetch lines | 1 |
+| entity graph (lines and products) | 1 |
+| service-level batch size 16 | 5 |
+
+The batch-size variant sets Hibernate's fetch batch size to 16 inside the service method. It does **not** use `@BatchSize(16)` on `Order.lines`, because that mapping-level setting also batches the naive variant and changes its expected count. These tests count statements; they do not measure elapsed time.
+
+### Timing benchmark
+
+No timing benchmark is currently implemented, so median times are not reported here. To complete that part of the task, run each variant after a warm-up, collect 20 elapsed-time samples under the same conditions, and record the median:
+
+| variant | statements | median ms |
+|---|---:|---:|
+| naive lazy loop | 51 | not measured |
+| join fetch lines | 1 | not measured |
+| entity graph | 1 | not measured |
+| service-level batch size 16 | 5 | not measured |
+
+### Product-name fetching
+
+The current report methods only call `order.getLines().size()`; they do not access `line.getProduct().getName()`. The repository entity-graph query fetches both `lines` and `lines.product`, while the join-fetch and batch-size variants fetch only the lines. Add and measure product-name report variants before claiming which ones regress into additional product queries. `default_batch_fetch_size=32` is not currently configured in `application.yml`; add it when testing the global batching comparison.
+
+### JDBC insert batching
+
+`application.yml` sets `hibernate.jdbc.batch_size=50` and `hibernate.order_inserts=true`. `BatchInsertTest` saves 1,000 products in one transaction and verifies 1,000 entity inserts and fewer than 100 prepared statements. Product IDs use a sequence with allocation size 50. The `IDENTITY` comparison is not part of the current test; perform it separately before documenting observed results. Batch logging is configured at `TRACE` for `org.hibernate.engine.jdbc.batch`.
+
+### V2 indexes and EXPLAIN
+
+The V2 migration adds indexes on `orders(customer_id, placed_at DESC)`, `order_line(order_id)`, and `product(category, amount)`. Capture actual H2 plans before and after applying V2; plans depend on the database version, schema contents, and query. The before/after plan output has not yet been recorded here.
+
+In the H2 console, run the same query before and after the migration and paste the actual output:
+
+```sql
+EXPLAIN SELECT * FROM orders
+WHERE customer_id = 1
+ORDER BY placed_at DESC;
+```
