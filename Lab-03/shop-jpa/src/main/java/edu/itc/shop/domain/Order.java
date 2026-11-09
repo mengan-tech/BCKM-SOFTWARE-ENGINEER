@@ -20,7 +20,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -44,10 +43,12 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> lines = new ArrayList<>();
 
+   
     @Version
     private long version;
 
-    protected Order() { }
+    protected Order() {
+    }
 
     public Order(Customer customer) {
         this.customer = customer;
@@ -92,13 +93,29 @@ public class Order {
         return total == null ? Money.eur("0") : total;
     }
 
-    public Long getId() { return id; }
-    public Customer getCustomer() { return customer; }
-    public OrderStatus getStatus() { return status; }
-    public Instant getPlacedAt() { return placedAt; }
-    public long getVersion() { return version; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setStatus(OrderStatus status) { this.status = status; }
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public Instant getPlacedAt() {
+        return placedAt;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
 
     @Override
     public boolean equals(Object other) {
