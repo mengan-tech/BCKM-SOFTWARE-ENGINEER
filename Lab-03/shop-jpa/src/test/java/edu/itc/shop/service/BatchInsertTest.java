@@ -2,11 +2,15 @@ package edu.itc.shop.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.support.TransactionTemplate;
+
 import edu.itc.shop.domain.Category;
 import edu.itc.shop.domain.Money;
 import edu.itc.shop.domain.Order;
@@ -14,9 +18,6 @@ import edu.itc.shop.domain.Product;
 import edu.itc.shop.repository.OrderRepository;
 import edu.itc.shop.repository.ProductRepository;
 import edu.itc.shop.support.QueryCounter;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class BatchInsertTest {
@@ -33,7 +34,7 @@ class BatchInsertTest {
 
         tx.executeWithoutResult(status -> {
             List<Product> batch = new ArrayList<>(1000);
-            long runId = System.nanoTime();
+            long runId = System.nanoTime() % 1_000_000;   
             for (int i = 0; i < 1000; i++) {
                 Product p = new Product(
                         "B-" + runId + "-" + i,
