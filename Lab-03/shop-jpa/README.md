@@ -15,7 +15,8 @@
 ### Run the application with test data
 - ./mvnw spring-boot:run "-Dspring-boot.run.profiles=dev"
 
-
+### check the h2-console:
+- http://localhost:8080/h2-console
 ---
 
 ## Task 1
@@ -141,3 +142,13 @@ EXPLAIN SELECT * FROM orders
 WHERE customer_id = 1
 ORDER BY placed_at DESC;
 ```
+
+### Step 7 – Flyway V2 and indexes
+
+Flyway history with both versions, and an `EXPLAIN` showing the new index `idx_product_category_amount` in use:
+
+![H2 console: flyway_schema_history and EXPLAIN](screenshots/h2-flyway-explain.png)
+
+Note: H2 automatically creates an index for every foreign key, so `orders.customer_id` and
+`order_line.order_id` were already indexed by V1. For `WHERE customer_id = ?`, H2 chose the
+foreign-key index `FK_ORDERS_CUSTOMER_INDEX_8` instead of `idx_orders_customer_placed`.
