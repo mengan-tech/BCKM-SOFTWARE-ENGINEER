@@ -35,8 +35,8 @@
   <dependencies>
     <!-- Jakarta REST 4.0 API arrives transitively (jakarta.ws.rs-api) -->
     <dependency>
-      <groupId>org.glassfish.jersey.containers</groupId>
-      <artifactId>jersey-container-grizzly2-http</artifactId>
+      <groupId>org.glassfish.jersey.ext</groupId>
+      <artifactId>jersey-bean-validation</artifactId>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
@@ -44,7 +44,7 @@
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-json-binding</artifactId>      <!-- JSON-B (Yasson) -->
+      <artifactId>jersey-media-json-binding</artifactId>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
@@ -56,8 +56,8 @@
       <version>4.0.5</version>
     </dependency>
     <dependency>
-      <groupId>org.glassfish.jersey.ext</groupId>
-      <artifactId>jersey-bean-validation</artifactId>         <!-- Hibernate Validator -->
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-grizzly2-http</artifactId>
     </dependency>
 
     <dependency>
