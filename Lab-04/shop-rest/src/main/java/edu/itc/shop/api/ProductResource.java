@@ -22,6 +22,7 @@ import edu.itc.shop.domain.ProductRepository;
 import edu.itc.shop.domain.DuplicateSkuException;
 import edu.itc.shop.domain.InsufficientStockException;
 import edu.itc.shop.domain.Money;
+import edu.itc.shop.api.filter.Compress;
 
 @Path("/products")
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -36,6 +37,7 @@ public class ProductResource {
     }
 
     @GET
+    @Compress
     public List<ProductDto> list(@BeanParam @Valid ProductFilter f) {
         validateCurrency(f.minPrice);
         validateCurrency(f.maxPrice);
