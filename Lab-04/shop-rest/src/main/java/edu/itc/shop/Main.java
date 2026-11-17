@@ -1,28 +1,30 @@
 package edu.itc.shop;
 
 import java.net.URI;
+
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+
 import edu.itc.shop.domain.InMemoryProductRepository;
 import edu.itc.shop.domain.ProductRepository;
+import edu.itc.shop.domain.ReviewRepository;
 
 
 public class Main {
     public static final URI BASE = URI.create("http://localhost:8080/api/");
 
-
-    /** The application: scanned resources/providers + one shared repository. */
     public static ResourceConfig config() {
         return new ResourceConfig()
-                .packages("edu.itc.shop.api")
-                .register(new AbstractBinder() {
-                    @Override
-                    protected void configure() {
-                        bind(new InMemoryProductRepository()).to(ProductRepository.class);
-                    }
-                });
+            .packages("edu.itc.shop.api")
+            .register(new AbstractBinder() {
+                @Override
+                protected void configure() {
+                    bind(new InMemoryProductRepository()).to(ProductRepository.class);
+                    bind(new ReviewRepository()).to(ReviewRepository.class);   // TASK 5
+                }
+            });
     }
 
     public static void main(String[] args) throws Exception {

@@ -1,18 +1,22 @@
 package edu.itc.shop.api.params;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import edu.itc.shop.domain.Money;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;
 import jakarta.ws.rs.ext.Provider;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 @Provider
 public class MoneyConverterProvider implements ParamConverterProvider {
     private static final ParamConverter<Money> CONVERTER = new ParamConverter<>() {
         @Override
         public Money fromString(String value) {
+            if (value == null || value.isBlank()) {
+                return null;
+            }
             try {
                 return Money.parse(value);
             } catch (IllegalArgumentException ex) {
@@ -22,7 +26,7 @@ public class MoneyConverterProvider implements ParamConverterProvider {
 
         @Override
         public String toString(Money value) {
-            return value.toString();
+            return value == null ? null : value.toString();
         }
     };
 

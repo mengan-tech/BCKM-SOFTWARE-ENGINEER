@@ -1,0 +1,11 @@
+package edu.itc.shop.api.dto;
+
+import edu.itc.shop.domain.Money;
+import edu.itc.shop.domain.Product;
+
+public record ProductV2(long id, String name, String sku, Money price, int stock, boolean available) {
+    public static ProductV2 from(Product p) {
+        return new ProductV2(p.id(), p.name(), p.sku(), new Money(p.price(), "EUR"),
+                p.stock(), p.stock() > 0);
+    }
+}
