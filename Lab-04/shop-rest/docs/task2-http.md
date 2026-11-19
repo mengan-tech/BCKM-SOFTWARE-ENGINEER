@@ -2,31 +2,31 @@
 ## Testing
 run mvn -q compile exec:java and open new window terminal or bash
 1. Create a Product (Should return 201 Created + Location Header)
-curl -i -X POST localhost:8080/api/products -H 'Content-Type: application/json' -d '{"name":"Teapot","sku":"TP-01","price":31.00,"stock":5}'
+curl -i -X POST localhost:8080/api/products -H 'X-Api-Key: demo-123' -H 'Content-Type: application/json' -d '{"name":"Teapot","sku":"TP-01","price":31.00,"stock":5}'
 
 2. Prevent Duplicate SKU (Should return 409 Conflict)
-curl -i -X POST localhost:8080/api/products -H 'Content-Type: application/json' -d '{"name":"Teapot","sku":"TP-01","price":31.00,"stock":5}'
+curl -i -X POST localhost:8080/api/products -H 'X-Api-Key: demo-123' -H 'Content-Type: application/json' -d '{"name":"Teapot","sku":"TP-01","price":31.00,"stock":5}'
 
 3. XML Round Trip (POST XML)
-curl -i -X POST localhost:8080/api/products -H 'Content-Type: application/xml' -d '<product><name>Plate</name><sku>PL-01</sku><price>12.00</price><stock>20</stock></product>'
+curl -i -X POST localhost:8080/api/products -H 'X-Api-Key: demo-123' -H 'Content-Type: application/xml' -d '<product><name>Plate</name><sku>PL-01</sku><price>12.00</price><stock>20</stock></product>'
 
 4. XML Round Trip (GET XML - Should return the Plate in XML format)
-curl -s localhost:8080/api/products/4 -H 'Accept: application/xml'
+curl -s localhost:8080/api/products/4 -H 'X-Api-Key: demo-123' -H 'Accept: application/xml'
 
 5. PATCH Stock Success (Should return 200 OK)
-curl -i -X PATCH localhost:8080/api/products/3/stock -H 'Content-Type: application/json' -d '{"delta":5}'
+curl -i -X PATCH localhost:8080/api/products/3/stock -H 'X-Api-Key: demo-123' -H 'Content-Type: application/json' -d '{"delta":5}'
 
 6. PATCH Stock Failure (Should return 409 Conflict because stock goes negative)
-curl -i -X PATCH localhost:8080/api/products/3/stock -H 'Content-Type: application/json' -d '{"delta":-10}'
+curl -i -X PATCH localhost:8080/api/products/3/stock -H 'X-Api-Key: demo-123' -H 'Content-Type: application/json' -d '{"delta":-10}'
 
 7. DELETE Success (Should return 204 No Content)
-curl -i -X DELETE localhost:8080/api/products/4
+curl -i -X DELETE localhost:8080/api/products/4 -H 'X-Api-Key: demo-123'
 
 8. DELETE Missing Product (Should return 404 Not Found)
-curl -i -X DELETE localhost:8080/api/products/4
+curl -i -X DELETE localhost:8080/api/products/4 -H 'X-Api-Key: demo-123'
 
 9. Unsupported Media Type (Should return 415)
-curl -i -X POST localhost:8080/api/products -H 'Content-Type: text/plain' -d 'Teapot'
+curl -i -X POST localhost:8080/api/products -H 'X-Api-Key: demo-123' -H 'Content-Type: text/plain' -d 'Teapot'
 
 ---
 
