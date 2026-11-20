@@ -2,7 +2,8 @@
 
 ### 1. POST without a key (401 problem+json)
 ```bash
-$ curl -i -X POST localhost:8080/api/products -H 'Content-Type: application/json' -d '{"sku":"TEST-1","name":"Test","price":"10.00 USD","stock":5}'
+curl -i -X POST localhost:8080/api/products -H 'Content-Type: application/json' -d '{"sku":"TEST-1","name":"Test","price":"10.00 USD","stock":5}'
+
 HTTP/1.1 401 Unauthorized
 WWW-Authenticate: ApiKey realm="shop"
 Content-Type: application/problem+json
@@ -12,7 +13,7 @@ Content-Type: application/problem+json
 
 ### 2. POST with wrong key (401)
 ```bash
-$ curl -i -X POST localhost:8080/api/products -H 'X-Api-Key: wrong-key' -H 'Content-Type: application/json' -d '{"sku":"TEST-1","name":"Test","price":"10.00 USD","stock":5}'
+$ curl -i -X POST localhost:8080/api/products -H 'X-Api-Key: demo-123' -H 'Content-Type: application/json' -d '{"sku":"TEST-1","name":"Test","price":"10.00 USD","stock":5}'
 HTTP/1.1 401 Unauthorized
 ```
 
@@ -32,7 +33,8 @@ Access-Control-Allow-Methods: GET,POST,PUT,PATCH,DELETE
 
 ### 5. GET showing X-Correlation-Id echoed back
 ```bash
-$ curl -si localhost:8080/api/products/1 -H 'X-Correlation-Id: order-check-42' | grep -i correlation
+$ curl -si localhost:8080/api/products/1 -H 'X-Correlation-Id: order-check-42'
+
 X-Correlation-Id: order-check-42
 ```
 
