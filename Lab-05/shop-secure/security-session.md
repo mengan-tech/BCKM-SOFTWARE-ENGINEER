@@ -27,3 +27,30 @@ HTTP/1.1 204
 ```
 
 These are expected responses; replay the commands from a running server to capture the full live headers and body.
+
+## Security session (task-2)
+
+The registration endpoint rejects invalid passwords with field-level problem details and persists successful accounts with delegating bcrypt hashes:
+
+```text
+$ curl -i -X POST localhost:8080/api/register -H 'Content-Type: application/json' -d '{"username":"bob","password":"short"}'
+HTTP/1.1 400
+Content-Type: application/problem+json
+
+{"type":"about:blank","title":"Bad Request","status":400,"detail":"Validation failed","instance":"/api/register","errors":[{"field":"password","message":"size must be between 12 and 72"},{"field":"password","message":"must contain an upper-case letter, a lower-case letter and a digit"}]}
+
+$ curl -i -X POST localhost:8080/api/register -H 'Content-Type: application/json' -d '{"username":"bob","password":"Correct-Horse-9"}'
+HTTP/1.1 201
+{"username":"bob"}
+
+$ curl -i -u bob:Correct-Horse-9 localhost:8080/api/me
+HTTP/1.1 200
+{"name":"bob","roles":["ROLE_CUSTOMER"]}
+```
+
+Queried from the H2 `users` table during the registration integration test:
+
+```text
+ID  USERNAME  PASSWORD_HASH                                                          ENABLED
+3   bob       {bcrypt}$2a$10$H82.oNk8nY02ldIVAee1N.Fr/C1.SaAujHetfx/3MjDbTaguSL/r2 TRUE
+```

@@ -2,7 +2,7 @@
 
 ## Catalogue API
 
-The application seeds three products at startup. `GET /api/products` and `GET /api/products/{id}` are public. Creating a product requires authentication, deleting one requires the `ADMIN` role, other `/api/**` routes require authentication, and all other routes are denied. Temporary users are `admin/admin` (ADMIN) and `alice/alice`.
+The application seeds three products and JPA-backed accounts at startup. Set `shop.seed.admin-password` and `shop.seed.customer-password` to configure the seed passwords; development defaults are provided. `GET /api/products` and `GET /api/products/{id}` are public. Creating a product requires authentication, deleting one requires the `ADMIN` role, `POST /api/register` is public, and other `/api/**` routes require authentication.
 
 ## Spring Security with zero application configuration
 
@@ -26,7 +26,7 @@ Content-Type: application/json
 [{"id":1,"name":"USB-C cable","price":7.90,"stock":25},{"id":2,"name":"Wireless mouse","price":19.90,"stock":12},{"id":3,"name":"Keyboard","price":49.50,"stock":8}]
 ```
 
-The generated password depends on each app startup and is intentionally not fabricated in this document. The checked-in implementation uses temporary local users instead of the generated user.
+The generated password depends on each app startup and is intentionally not fabricated in this document. The checked-in implementation uses JPA-backed accounts with bcrypt password hashes.
 
 ## Explicit security behavior
 

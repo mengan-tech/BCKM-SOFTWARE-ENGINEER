@@ -13,9 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,10 +31,13 @@ public class SecurityConfig {
                         "Forbidden", "Access denied");
 
         http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/h2-console", "/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll())
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .httpBasic(basic -> basic.authenticationEntryPoint(authenticationEntryPoint))
                 .formLogin(form -> form.disable())
                 // CSRF is safe to disable because this API uses only Basic/Bearer credentials, not cookies.
@@ -47,13 +47,6 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler));
         return http.build();
-    }
-
-    @Bean
-    UserDetailsService temporaryUsers() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("admin").password("{noop}admin").roles("ADMIN").build(),
-                User.withUsername("alice").password("{noop}alice").roles("CUSTOMER").build());
     }
 
     private static void writeProblem(ObjectMapper objectMapper, String requestUri, HttpServletResponse response,
