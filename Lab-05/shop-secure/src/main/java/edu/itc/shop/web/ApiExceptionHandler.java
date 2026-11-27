@@ -13,6 +13,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.net.URI;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -63,5 +70,13 @@ public class ApiExceptionHandler {
         problem.setType(URI.create("about:blank"));
         problem.setTitle(title);
         return problem;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
+        pd.setTitle("Forbidden");
+        pd.setInstance(URI.create(request.getRequestURI()));
+        return pd;
     }
 }

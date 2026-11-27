@@ -54,3 +54,27 @@ Queried from the H2 `users` table during the registration integration test:
 ID  USERNAME  PASSWORD_HASH                                                          ENABLED
 3   bob       {bcrypt}$2a$10$H82.oNk8nY02ldIVAee1N.Fr/C1.SaAujHetfx/3MjDbTaguSL/r2 TRUE
 ```
+
+## Security session (task-3)
+
+Orders are owned by the authenticated customer and protected with `@PreAuthorize` / `@PostAuthorize` method security rules:
+
+```text
+$ curl -i -u alice:Alice-pass-123 -X POST localhost:8080/api/orders -H 'Content-Type: application/json' -d '{"productId":2,"quantity":1}'
+HTTP/1.1 201
+Location: /api/orders/1
+Content-Type: application/json
+
+{"id":1,"customer":"alice","productId":2,"quantity":1,"status":"NEW"}
+
+$ curl -i -u bob:Correct-Horse-9 localhost:8080/api/orders/1
+HTTP/1.1 403
+Content-Type: application/problem+json
+
+{"type":"about:blank","title":"Forbidden","status":403,"detail":"Access denied","instance":"/api/orders/1"}
+
+$ curl -i -u admin:Admin-pass-123 localhost:8080/api/orders/1
+HTTP/1.1 200
+Content-Type: application/json
+
+{"id":1,"customer":"alice","productId":2,"quantity":1,"status":"NEW"}

@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
 @SpringBootApplication
 public class ShopSecureApplication {
@@ -21,6 +22,7 @@ public class ShopSecureApplication {
 	}
 
 	@Bean
+	@ConditionalOnBean(ProductRepository.class)
 	CommandLineRunner seedProducts(ProductRepository repository) {
 		return args -> {
 			if (repository.count() == 0) {
@@ -33,6 +35,7 @@ public class ShopSecureApplication {
 	}
 
 	@Bean
+	@ConditionalOnBean(AccountService.class)
 	CommandLineRunner seedAccounts(
 			AccountService accounts,
 			@Value("${shop.seed.admin-password:Dev-Admin-Password-9}") String adminPassword,
